@@ -1,4 +1,4 @@
-# 零代码 一键部署chatGPT到企业微信应用 <br/>
+# 零代码 一键部署chatGPT到企业微信应用 无须VPN<br/>
 
 
 
@@ -13,17 +13,35 @@
    ChatGPT 接入企业微信,赋能商业成功
 </div>
 
+## 重要说明
+现一键部署已支持钉钉和企业微信, 以下情况请选择钉钉的一键部署：<br>
+
+1. 如果一键部署企业微信遇到域名问题，又不想购买域名，请选择钉钉的一键部署。<br/>
+1. 如果一键部署企业微信遇到可信IP问题，又不想购买独立服务器，请选择钉钉的一键部署。<br/>
+2. 要求群聊里支持Chatgpt, 请选择钉钉的一键部署。
+3. 如果没有特别要求，建议优先选择钉钉的一键部署，因为钉钉相对容易。 <br/>
+4. 企业微信部署可能遇到问题及解决办法，最参考下面的**问题汇总**。
+
+<div align="center">
+    <img src="https://user-images.githubusercontent.com/12178686/236364198-d1d7d298-16d0-4e81-aaf7-89d108f0eea3.png" width="200px">
+</div>
+<div align="center">
+ [钉钉一键部署ChatGPT](https://github.com/sytpb/chatgpt-dingtalk-robot)
+</div>
+
+
 ## 关于本项目
 本项目可以实现一键部署ChatGPT到企业微信中，使ChatGPT与企业微信完美融合，手机或电脑上，打开企业微信，就可以使用强大的ChatGPT智能问答。截止目前，本项目可以提供两个能力:<br>
 
-1. 功能集成，将ChatGPT问答功能集成到企业微信中，借助企业微信权限功能，可以将ChatGPT共享到企业应用当中，此功能要求简单，有企业微信管理员权限即可，方法，参照下面的**部署方法**
+1. 功能集成，将ChatGPT问答功能集成到企业微信中，借助企业微信权限功能，可以将ChatGPT共享到企业应用当中，此功能要求简单，有企业微信管理员权限即可，方法，参照下面的**一键部署方法**
 2. 更强大的功能扩展，本项目为开源项目，有开发能力的小伙伴可以Fork到自己的仓库，根据自己企业业务需要，比如结合企业微信开放的API，二次开发一些其他功能。
 
 3. 其他功能，后续更新。
 
 
-## 部署方法
+## 一键部署方法
 
+[指导视频](https://youtu.be/UOm39-_Loaw)
 1. 创建企业微信应用<br>
 
 第一步，创建应用，操作方法：企微管理员， 电脑端上的企业微信-->头像-->管理企业-->应用管理-->（最下面）创建应用-->应用logo + 填入基本信息
@@ -76,9 +94,96 @@ IP地址如下图，Render->Connect->Outbound
 经过一段时间的测试，如果想提高回复速度，办法一是升级Render 为付费，另外一个最重要的因素是chatgpt回复的有延迟，因为用的是GPT 3.5 turbo, 如果是PLUS 用户的API Key 会快很多，这是本人的测试情况，供参考。
 
 
-### ChatGPT的诞生给整个产业带来巨大的变化，希望大家多交流，多提issue 和点star 关注后续，也希望更多开发小伙伴参与进来，一起撸代码，一起搞新功能。
+### 问题汇总
+1. 服务器异常，稍后再试 <br/>
+请检查服务是否部署完成和正常启动，需要看到your server is live字样才代表服务正常。
 
-### Weixin: pig9pig
+2. openapi回调地址请求不通过 <br/>
+请请检查你的接收地址配置是否正确， https://..../message ,必须https开头，/message/结束。
+
+3. 收到提示“域名主体校验未通过...” <br/>
+解决办法： 原因腾讯对认证企业的安全检测，办法是需要企业有自己的域名，然后配置自己的域名CNAME指向上面的域名，这样就符合企业微信合规检测。
+
+
+4. 给AI发消息，只收到“正在生成回答”，服务端也看到了AI回复 <br/>
+问题原因是没有配置可信IP。按文档中要求正确配置即可。
+
+5. 可信IP无法配置 <br/>
+解决办法：提示不允许第三方IP, 要求公司自己的服务器的，原因腾讯对认证企业的安全检测，遇此问题的, 办法一是购买自己的服务器，将服务配置到服务器上，办法二是选择钉钉一键部署，钉钉没有此限制。
+
+## 服务器部署
+<details>
+    <summary>点击查看详细</summary>
+<br>
+以下方法适用于，已经拥有自己的独立的服务器的同学。
+1. 前提条件，有国内独立服务器，并且有自己独立的域名（企业微信信已认证的，要求域名在公司名下）
+域名解析参考
+<img src="https://user-images.githubusercontent.com/12178686/236603276-d4bed8fb-5ba0-488c-8da4-5014d2a6bf8d.png">
+
+2. 安装nodejs ，以linux centos 举例，[以下过程作为参考，整个过程待后续详细确认]
+centos 为例
+```
+sudo yum install nodejs  
+```
+3. github 获取代码
+```
+git clone https://github.com/sytpb/chatgpt-wework-robot
+
+```
+4. 安装服务
+```
+cd chatgpt-wework-robot
+npm install 
+```
+
+5. 配置服务
+```
+ cd /etc/systemd/system
+ touch aistory.service
+```
+vim aistory.service 内容如下
+```
+[Unit]
+Description = ai story service
+After = network.target
+
+[Service]
+ExecStart = your path/aistory.sh
+
+[Install]
+WantedBy = multi-user.target
+```
+
+aistory.sh
+```
+#!/bin/bash
+npm run dev
+```
+
+```
+chmod +x aistory.sh
+```
+
+```
+systemctl start aistory.service
+```
+</details>
+
+## 新功能调查
+
+您的工作场景，最想要Chatgpt为您做什么？除了现有的问答模式。假如需要以下功能，
+
+1、语音对话，什么场景用？
+
+2、图片生成，什么场景用？
+
+3、其他，请列举
+
+欢迎来群里讨论！
+
+<div align="center">
+     <img src="https://user-images.githubusercontent.com/12178686/236223678-7df62f05-0623-45dd-8cdc-1a355656a75b.jpg" width="200px" alt="group">
+</div>
 
 
 
